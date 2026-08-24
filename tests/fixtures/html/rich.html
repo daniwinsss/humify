@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Quarterly Report</title>
+  <style>
+    body { font-family: Georgia, serif; color: #222; }
+    .lead { font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+  <h1 id="title" class="page-title">Quarterly Report</h1>
+
+  <p class="lead" style="margin-bottom: 1rem;">This is <strong>very important</strong> information that the team must review before <em>Friday</em>.</p>
+
+  <p>Contact <a href="mailto:ops@example.com">ops@example.com</a> or visit <a href="https://example.com/docs" class="ext" id="docs-link">the documentation</a> for details.</p>
+
+  <h2>Key results</h2>
+  <ul class="results">
+    <li>Revenue increased across every region.</li>
+    <li>Churn fell to <strong>2.1%</strong>, the lowest on record.</li>
+    <li>Support response times improved <em>substantially</em>.</li>
+  </ul>
+
+  <ol>
+    <li>Review the figures.</li>
+    <li>Approve the summary.</li>
+  </ol>
+
+  <h3>Regional breakdown</h3>
+  <table id="regions" class="data">
+    <thead>
+      <tr><th>Region</th><th>Revenue</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>North</td><td>1,200</td></tr>
+      <tr><td>South</td><td>980</td></tr>
+    </tbody>
+  </table>
+
+  <blockquote cite="https://example.com/quote">The results speak for themselves.</blockquote>
+
+  <figure>
+    <img src="chart.png" alt="Revenue chart" width="400" height="200">
+    <figcaption>Revenue by quarter.</figcaption>
+  </figure>
+
+  <p>Run the following command to reproduce the numbers:</p>
+  <pre><code>npm run report -- --quarter=Q3</code></pre>
+
+  <p>Inline code such as <code>getRevenue()</code> must also survive untouched.</p>
+
+  <p>Deeply <strong>nested <em>formatting <u>like this</u></em></strong> is common in exported documents.</p>
+
+  <script>
+    console.log("this script must never be humanized");
+  </script>
+</body>
+</html>

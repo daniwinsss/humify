@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Rewrite {
+  id                     Int        @id @default(autoincrement())
+  original               String
+  rewritten              String
+  style                  String
+  language               String     @default("auto")
+  createdAt              DateTime   @default(now()) @map("created_at")
+  aiLikelihoodOriginal   Int?       @map("ai_likelihood_original")
+  aiLikelihoodHumanized  Int?       @map("ai_likelihood_humanized")
+  aiLikelihoodDifference Int?       @map("ai_likelihood_difference")
+  feedback               Feedback[]
+
+  @@map("rewrites")
+}
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  rewriteId Int      @map("rewrite_id")
+  rating    String
+  createdAt DateTime @default(now()) @map("created_at")
+  rewrite   Rewrite  @relation(fields: [rewriteId], references: [id], onDelete: Cascade)
+
+  @@map("feedback")
+}
+
+model WritingProfile {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  description        String   @default("")
+  tone               String   @default("neutral")
+  formality          Int      @default(50)
+  customInstructions String   @default("") @map("custom_instructions")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  @@map("writing_profiles")
+}
+
+model ApiKey {
+  id        Int       @id @default(autoincrement())
+  key       String    @unique
+  name      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  lastUsed  DateTime? @map("last_used")
+
+  @@map("api_keys")
+}
+
+model Metric {
+  id          Int      @id @default(autoincrement())
+  endpoint    String
+  method      String
+  statusCode  Int      @map("status_code")
+  durationMs  Int      @map("duration_ms")
+  inputChars  Int?     @map("input_chars")
+  outputChars Int?     @map("output_chars")
+  style       String?
+  language    String?
+  error       String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("metrics")
+}

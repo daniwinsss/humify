@@ -1,26 +1,219 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+ * Drive `dark:` from the `.dark` class that ThemeToggle sets on <html>, not from the OS.
+ * Tailwind v4 defaults this variant to `prefers-color-scheme`, which left the toggle inert.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-dm-sans);
   --font-mono: var(--font-geist-mono);
+
+  /*
+   * Named brand tokens, from the Humify wireframes design doc (direction 1a). The landing page
+   * uses these directly; the rest of the app reaches the same language through the ramp
+   * overrides below.
+   */
+  --font-display: var(--font-dm-serif);
+  --font-dm: var(--font-dm-sans);
+
+  --color-ink: #1a1a1a;
+  --color-clay: #c67139;
+  --color-olive: #7a8a5e;
+  --color-cream: #f4f3f0;
+  --color-parchment: #faf9f7;
+  --color-sand: #e8e4dc;
+  --color-sand-deep: #d4d0c8;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+ * ============================================================================
+ *  READ THIS BEFORE PICKING A COLOUR
+ *
+ *  `zinc`, `indigo`, `violet` and `amber` below are ALIASES. They are NOT the
+ *  Tailwind colours of those names:
+ *
+ *      zinc   -> warm neutral (cream / sand / warm near-black)
+ *      indigo -> clay, the terracotta brand accent
+ *      violet -> olive, the secondary accent
+ *      amber  -> a yellow-shifted warning tone
+ *
+ *  Why alias instead of renaming the classes in every component: ~600 colour
+ *  classes across 21 files, nearly all in `dark:`-paired form, and five places
+ *  where a colour pair is the ONLY indicator of state (mode tabs, style cards,
+ *  profile chips, output-format chips, feedback thumbs) plus two hover-only
+ *  delete affordances. Retargeting the ramps changes every one of them at once
+ *  and makes it structurally impossible to drop one by hand.
+ *
+ *  This works because Tailwind declares its palette in `@theme default { … }`
+ *  (node_modules/tailwindcss/theme.css) and `default` means "yield to a user
+ *  value". Two rules follow:
+ *    1. This must be a plain `@theme` block, NOT `@theme inline`. `inline`
+ *       substitutes values into the utility and emits no custom property, so
+ *       `@theme inline { --color-indigo-600: var(--color-clay) }` would compile
+ *       to `background-color: var(--color-clay)` with nothing defining it.
+ *    2. Every step of an overridden ramp must be declared. Unused theme vars are
+ *       tree-shaken, so a partial override leaves the rest cool.
+ *
+ *  `red`, `emerald`, `blue`, `green` and `purple` are deliberately left at their
+ *  stock values — they carry meaning (error, success, ScoreBar's 70/40
+ *  thresholds, the four writing-style badges), not decoration.
+ *
+ *  Values were derived in OKLCH at the same lightness as the zinc ramp they
+ *  replace, so every pre-existing contrast relationship survives; the few
+ *  deviations are noted inline. Debt: an editor's colour preview will show
+ *  indigo swatches for terracotta. The eventual fix is a mechanical codemod
+ *  (indigo- -> clay-, violet- -> olive-, zinc- -> stone-) plus a lint guard.
+ * ============================================================================
+ */
+@theme {
+  /* Warm neutral. 50 is the cream page, 200/300 the sand borders, 900/950 the
+   * warm dark surfaces. 500 is darkened below stock (L 55.2% -> 52.5%) because
+   * the cream page is darker than zinc-50 was, and `text-zinc-500` on it would
+   * otherwise fall to 4.35:1. It now measures 4.89:1. */
+  --color-zinc-50: #f5f3ef;
+  --color-zinc-100: #f0ece8;
+  --color-zinc-200: #e9e4dd;
+  --color-zinc-300: #d5d0c8;
+  --color-zinc-400: #a59f97;
+  --color-zinc-500: #6f6962;
+  --color-zinc-600: #57524b;
+  --color-zinc-700: #443f39;
+  --color-zinc-800: #312d28;
+  --color-zinc-900: #23211d;
+  --color-zinc-950: #171512;
+
+  /* Clay. The brand terracotta #c67139 sits at 500 — where it is used for focus
+   * borders, rings and `accent-*`, never behind text. It deliberately does NOT
+   * sit at 600: white 14px text on #c67139 is 3.6:1 and 600 is the primary CTA
+   * (`bg-indigo-600 text-white`). 600 is darkened to reach 5.15:1. */
+  --color-indigo-50: #fcf1eb;
+  --color-indigo-100: #fae2d5;
+  --color-indigo-200: #f8cbb1;
+  --color-indigo-300: #edad89;
+  --color-indigo-400: #d88f65;
+  --color-indigo-500: #bf7447;
+  --color-indigo-600: #a45a2a;
+  --color-indigo-700: #86481f;
+  --color-indigo-800: #6b3918;
+  --color-indigo-900: #552d14;
+  --color-indigo-950: #2e1607;
+
+  /* Olive, centred on the brand #7a8a5e. */
+  --color-violet-50: #f2f5eb;
+  --color-violet-100: #e4ebd6;
+  --color-violet-200: #d1dbbb;
+  --color-violet-300: #b4c198;
+  --color-violet-400: #97a579;
+  --color-violet-500: #7d8865;
+  --color-violet-600: #647047;
+  --color-violet-700: #505a37;
+  --color-violet-800: #3d452a;
+  --color-violet-900: #2d331f;
+  --color-violet-950: #15190c;
+
+  /* Warning, shifted from stock amber's orange (hue ~70) to gold (hue 88).
+   * Stock amber-700 sits 2.4 degrees of hue from clay, so warnings would have
+   * read as brand accent — worst in DocumentPanel, where the lossy-format
+   * warning sits directly above a clay CTA. Gold keeps the warning signal while
+   * separating it from the accent. */
+  --color-amber-50: #fcf6e6;
+  --color-amber-100: #faecc9;
+  --color-amber-200: #f7dd9f;
+  --color-amber-300: #eeca72;
+  --color-amber-400: #e0b647;
+  --color-amber-500: #cea116;
+  --color-amber-600: #a37b00;
+  --color-amber-700: #836200;
+  --color-amber-800: #694e00;
+  --color-amber-900: #543f00;
+  --color-amber-950: #2d1f00;
+}
+
+/*
+ * Tailwind hardcodes the ring offset to #fff. That was invisible against the old
+ * near-white page; on cream it draws a white halo around the focused CTA
+ * (RewriteButton uses `focus:ring-offset-2` with no light-mode offset colour).
+ */
+@layer base {
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    --tw-ring-offset-color: var(--color-zinc-50);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Native <select> popups and scrollbars follow this, not the `.dark` class. */
+.dark {
+  color-scheme: dark;
 }
+
+/*
+ * The landing page is light-only by design. <body> carries `dark:text-zinc-50`, which would
+ * otherwise wash out this page's near-black type when the app theme is dark.
+ */
+.landing {
+  color-scheme: light;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+}
+
+/*
+ * Typography for the sanitized document preview.
+ *
+ * Tailwind's reset flattens headings, lists and tables, which would make a preview of a
+ * formatted document look like it lost its formatting — the opposite of what it exists to
+ * show. These rules are scoped to the preview container only.
+ *
+ * The pane is a sheet of paper: always light, in both app themes. Uploaded documents are
+ * written for a light page, and the sanitizer drops their <style> (it is a nonTextTag) while
+ * keeping inline `color` — so a dark surface here leaves their dark text unreadable.
+ *
+ * The colours here stay literal hex rather than theme tokens, on purpose. This pane must not
+ * follow the app theme, and hardcoding keeps that invariant obvious. They are brand-warm but
+ * still light-page values; a document's own inline `color` still overrides them.
+ */
+.document-preview {
+  color-scheme: light;
+  background: #ffffff;
+  color: #1f1d1a;
+}
+.document-preview h1 { font-size: 1.5rem; font-weight: 700; margin: 0.75em 0 0.4em; }
+.document-preview h2 { font-size: 1.25rem; font-weight: 700; margin: 0.75em 0 0.4em; }
+.document-preview h3 { font-size: 1.1rem; font-weight: 600; margin: 0.7em 0 0.35em; }
+.document-preview h4,
+.document-preview h5,
+.document-preview h6 { font-weight: 600; margin: 0.6em 0 0.3em; }
+.document-preview p { margin: 0.6em 0; }
+.document-preview strong, .document-preview b { font-weight: 700; }
+.document-preview em, .document-preview i { font-style: italic; }
+.document-preview u { text-decoration: underline; }
+.document-preview s, .document-preview strike { text-decoration: line-through; }
+/* Clay-700, not the accent itself: #c67139 is only 3.6:1 on white. */
+.document-preview a { color: #86481f; text-decoration: underline; }
+.document-preview ul { list-style: disc; padding-left: 1.5rem; margin: 0.6em 0; }
+.document-preview ol { list-style: decimal; padding-left: 1.5rem; margin: 0.6em 0; }
+.document-preview li { margin: 0.2em 0; }
+.document-preview blockquote {
+  border-left: 3px solid currentColor;
+  opacity: 0.85;
+  padding-left: 0.9rem;
+  margin: 0.7em 0;
+  font-style: italic;
+}
+.document-preview table { border-collapse: collapse; margin: 0.7em 0; display: block; overflow-x: auto; }
+.document-preview th, .document-preview td { border: 1px solid #d4d0c8; padding: 0.35rem 0.6rem; }
+.document-preview th { font-weight: 600; background: rgb(0 0 0 / 0.03); }
+.document-preview pre {
+  font-family: var(--font-mono), monospace;
+  background: rgb(0 0 0 / 0.05);
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 0.7em 0;
+}
+.document-preview code { font-family: var(--font-mono), monospace; font-size: 0.9em; }
+.document-preview img { max-width: 100%; height: auto; }
+.document-preview hr { border-top: 1px solid #d4d0c8; margin: 1em 0; }
