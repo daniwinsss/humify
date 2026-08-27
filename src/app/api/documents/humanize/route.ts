@@ -7,6 +7,7 @@ import {
   buildProfilePrompt,
   buildFeedbackExamples,
 } from "@/lib/prompts";
+import { getUserFromHeaders } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { isDocumentError } from "@/lib/documents/common/errors";
 import { MAX_FILE_BYTES, formatBytes, formatFromFilename } from "@/lib/documents/common/limits";
@@ -29,6 +30,11 @@ const ALLOWED_OUTPUTS: Record<DocumentFormat, DocumentFormat[]> = {
 };
 
 export async function POST(request: NextRequest) {
+  const user = getUserFromHeaders(request.headers);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const timer = logger.time("api.documents.humanize");
 
   const fail = async (status: number, error: string) => {
@@ -153,7 +159,9 @@ export async function POST(request: NextRequest) {
         result.textPreview.original,
         result.textPreview.humanized,
         effectiveStyle,
-        language
+        language,
+        undefined,
+        user.userId
       );
     }
 

@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { insertFeedback, getFeedback } from "@/lib/db";
+import { getUserFromHeaders } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
+  const user = getUserFromHeaders(request.headers);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const { rewriteId, rating } = await request.json();
 
@@ -28,6 +34,11 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const user = getUserFromHeaders(request.headers);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const rewriteId = request.nextUrl.searchParams.get("rewriteId");
   if (!rewriteId) {
     return NextResponse.json({ error: "rewriteId required" }, { status: 400 });

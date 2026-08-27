@@ -7,6 +7,19 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id           Int              @id @default(autoincrement())
+  email        String           @unique
+  name         String
+  passwordHash String           @map("password_hash")
+  createdAt    DateTime         @default(now()) @map("created_at")
+  rewrites     Rewrite[]
+  profiles     WritingProfile[]
+  apiKeys      ApiKey[]
+
+  @@map("users")
+}
+
 model Rewrite {
   id                     Int        @id @default(autoincrement())
   original               String
@@ -17,6 +30,8 @@ model Rewrite {
   aiLikelihoodOriginal   Int?       @map("ai_likelihood_original")
   aiLikelihoodHumanized  Int?       @map("ai_likelihood_humanized")
   aiLikelihoodDifference Int?       @map("ai_likelihood_difference")
+  userId                 Int?       @map("user_id")
+  user                   User?      @relation(fields: [userId], references: [id])
   feedback               Feedback[]
 
   @@map("rewrites")
@@ -40,6 +55,8 @@ model WritingProfile {
   formality          Int      @default(50)
   customInstructions String   @default("") @map("custom_instructions")
   createdAt          DateTime @default(now()) @map("created_at")
+  userId             Int?     @map("user_id")
+  user               User?    @relation(fields: [userId], references: [id])
 
   @@map("writing_profiles")
 }
@@ -50,6 +67,8 @@ model ApiKey {
   name      String
   createdAt DateTime  @default(now()) @map("created_at")
   lastUsed  DateTime? @map("last_used")
+  userId    Int?      @map("user_id")
+  user      User?     @relation(fields: [userId], references: [id])
 
   @@map("api_keys")
 }

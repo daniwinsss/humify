@@ -1,7 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { getMetricsSummary } from "@/lib/db";
+import { getUserFromHeaders } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const user = getUserFromHeaders(request.headers);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const summary = await getMetricsSummary();
     return NextResponse.json(summary);

@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { analyzeText, getGeminiErrorDetails } from "@/lib/gemini";
 import { recordMetric } from "@/lib/db";
 import { analyzeAILikelihood } from "@/lib/analysis";
+import { getUserFromHeaders } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
+  const user = getUserFromHeaders(request.headers);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const timer = logger.time("api.analyze");
 
   try {

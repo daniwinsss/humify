@@ -43,8 +43,11 @@ export default function Landing() {
           <Link href="/app" className="hidden transition-colors hover:text-ink sm:inline">
             Documents
           </Link>
+          <Link href="/login" className="transition-colors hover:text-ink">
+            Log in
+          </Link>
           <Link
-            href="/app"
+            href="/register"
             className="rounded-lg bg-ink px-4 py-2 text-[11px] font-semibold text-white transition-opacity hover:opacity-85"
           >
             Get started
@@ -84,7 +87,7 @@ export default function Landing() {
             Humanize →
           </button>
           <p className="mt-3.5 text-center text-[11px] font-medium text-[#a39e95]">
-            No sign-up required · Free to try
+            Free to use · Sign up in seconds
           </p>
         </div>
       </section>

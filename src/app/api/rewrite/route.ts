@@ -3,6 +3,7 @@ import { getGeminiErrorDetails, rewriteText } from "@/lib/gemini";
 import { insertRewrite, getPositiveFeedbackExamples, getProfile, recordMetric } from "@/lib/db";
 import { stylePrompts, buildLanguageInstruction, buildProfilePrompt, buildFeedbackExamples, buildRefinementPrompt, buildSignalGuidance } from "@/lib/prompts";
 import { analyzeAILikelihood, compareAILikelihood, toSummary } from "@/lib/analysis";
+import { getUserFromHeaders } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import type { Style, Language } from "@/types";
 
@@ -10,6 +11,10 @@ const validStyles: Style[] = ["professional", "casual", "academic", "friendly"];
 
 export async function POST(request: NextRequest) {
   const timer = logger.time("api.rewrite");
+  const user = getUserFromHeaders(request.headers);
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
     const body = await request.json();
@@ -99,7 +104,7 @@ export async function POST(request: NextRequest) {
       original: aiLikelihood.original.score,
       humanized: aiLikelihood.humanized.score,
       difference: aiLikelihood.difference,
-    });
+    }, user.userId);
 
     const duration = timer.end({ style: effectiveStyle, language, inputChars: text.trim().length, outputChars: rewritten.length });
     await recordMetric({

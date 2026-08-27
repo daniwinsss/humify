@@ -33,7 +33,8 @@ export async function insertRewrite(
   rewritten: string,
   style: string,
   language: string = "auto",
-  aiLikelihood?: AILikelihoodRecord
+  aiLikelihood?: AILikelihoodRecord,
+  userId?: number
 ): Promise<RewriteEntry> {
   const row = await prisma.rewrite.create({
     data: {
@@ -44,21 +45,23 @@ export async function insertRewrite(
       aiLikelihoodOriginal: aiLikelihood?.original ?? null,
       aiLikelihoodHumanized: aiLikelihood?.humanized ?? null,
       aiLikelihoodDifference: aiLikelihood?.difference ?? null,
+      userId: userId ?? null,
     },
   });
   return toRewriteEntry(row);
 }
 
-export async function getAllRewrites(): Promise<RewriteEntry[]> {
+export async function getAllRewrites(userId?: number): Promise<RewriteEntry[]> {
   const rows = await prisma.rewrite.findMany({
+    where: userId ? { userId } : {},
     orderBy: { createdAt: "desc" },
   });
   return rows.map(toRewriteEntry);
 }
 
-export async function deleteRewrite(id: number): Promise<boolean> {
+export async function deleteRewrite(id: number, userId?: number): Promise<boolean> {
   try {
-    await prisma.rewrite.delete({ where: { id } });
+    await prisma.rewrite.delete({ where: { id, ...(userId ? { userId } : {}) } });
     return true;
   } catch {
     return false;
@@ -140,16 +143,18 @@ export async function insertProfile(
   description: string,
   tone: string,
   formality: number,
-  customInstructions: string
+  customInstructions: string,
+  userId?: number
 ): Promise<WritingProfile> {
   const row = await prisma.writingProfile.create({
-    data: { name, description, tone, formality, customInstructions },
+    data: { name, description, tone, formality, customInstructions, userId: userId ?? null },
   });
   return toProfile(row);
 }
 
-export async function getAllProfiles(): Promise<WritingProfile[]> {
+export async function getAllProfiles(userId?: number): Promise<WritingProfile[]> {
   const rows = await prisma.writingProfile.findMany({
+    where: userId ? { userId } : {},
     orderBy: { createdAt: "desc" },
   });
   return rows.map(toProfile);
@@ -163,9 +168,9 @@ export async function getProfile(
   return toProfile(row);
 }
 
-export async function deleteProfile(id: number): Promise<boolean> {
+export async function deleteProfile(id: number, userId?: number): Promise<boolean> {
   try {
-    await prisma.writingProfile.delete({ where: { id } });
+    await prisma.writingProfile.delete({ where: { id, ...(userId ? { userId } : {}) } });
     return true;
   } catch {
     return false;
@@ -194,14 +199,15 @@ function toProfile(row: {
 
 // --- API Keys ---
 
-export async function createApiKey(name: string): Promise<ApiKey> {
+export async function createApiKey(name: string, userId?: number): Promise<ApiKey> {
   const key = `hum_${crypto.randomBytes(24).toString("hex")}`;
-  const row = await prisma.apiKey.create({ data: { key, name } });
+  const row = await prisma.apiKey.create({ data: { key, name, userId: userId ?? null } });
   return toApiKey(row);
 }
 
-export async function getAllApiKeys(): Promise<ApiKey[]> {
+export async function getAllApiKeys(userId?: number): Promise<ApiKey[]> {
   const rows = await prisma.apiKey.findMany({
+    where: userId ? { userId } : {},
     orderBy: { createdAt: "desc" },
   });
   return rows.map(toApiKey);
@@ -219,9 +225,9 @@ export async function validateApiKey(
   return toApiKey(row);
 }
 
-export async function deleteApiKey(id: number): Promise<boolean> {
+export async function deleteApiKey(id: number, userId?: number): Promise<boolean> {
   try {
-    await prisma.apiKey.delete({ where: { id } });
+    await prisma.apiKey.delete({ where: { id, ...(userId ? { userId } : {}) } });
     return true;
   } catch {
     return false;
