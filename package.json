@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "tsx --test \"tests/**/*.test.ts\"",
     "evaluate": "npx tsx scripts/evaluate.ts",
-    "evaluate:documents": "npx tsx scripts/evaluate-documents.ts"
+    "evaluate:documents": "npx tsx scripts/evaluate-documents.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -37,7 +38,5 @@
     "tsx": "^4.23.6",
     "typescript": "^5"
   },
-  "allowScripts": {
-    "better-sqlite3@13.0.2": true
-  }
+  "allowScripts": {}
 }
